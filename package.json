@@ -1,7 +1,13 @@
 {
   "name": "exchange-rates",
+  "author": "Jekabs Milbrets <jekabs.milbrets@me.com>",
   "version": "0.0.1",
-  "description": "Exchange rates, current/historic exchange rates",
+  "description": "Exchange rates, current/historic exchange rates using API exchangeratesapi.io",
+  "license" : "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jekabsmilbrets/exchange-rates.git"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
