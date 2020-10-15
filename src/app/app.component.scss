@@ -1,0 +1,32 @@
+@import '~@angular/material/theming';
+@import './components/header/header.component';
+@import './pages/exchange-rates/exchange-rates.component';
+
+// mixin name will be used in main style.scss
+@mixin layout-theme($theme) {
+  // retrieve variables from theme
+  // (all possible variables, use only what you really need)
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
+
+  html,
+  body {
+    height: 100vh;
+  }
+
+  body {
+    font: 400 14px/20px Roboto, "Helvetica Neue", sans-serif;
+    margin: 0;
+  }
+
+  body {
+    @include app-header($theme);
+    @include page-exchange-rates($theme);
+  }
+
+  main {
+  }
+}

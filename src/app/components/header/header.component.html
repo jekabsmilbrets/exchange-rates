@@ -1,0 +1,26 @@
+<header class="mat-elevation-z10">
+  <div class="container px-0">
+    <div class="row">
+      <div class="col">
+        <mat-toolbar color="primary">
+          <mat-icon [ngClass]="'slogan-icon'" routerLink="/exchange-rates">language</mat-icon>
+
+          <span class="slogan" routerLink="/exchange-rates">
+            Exchange rates
+          </span>
+
+          <span class="spacer"></span>
+
+          <nav backgroundColor="primary" mat-tab-nav-bar>
+            <a *ngFor="let route of routes"
+               [active]="isLinkActive(route.path)"
+               [hidden]="route.path===''"
+               [routerLink]="route.path"
+               mat-tab-link
+               routerLinkActive="active">{{route?.data?.name}}</a>
+          </nav>
+        </mat-toolbar>
+      </div>
+    </div>
+  </div>
+</header>

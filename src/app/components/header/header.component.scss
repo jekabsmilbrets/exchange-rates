@@ -1,0 +1,45 @@
+@import '~@angular/material/theming';
+
+@mixin app-header($theme) {
+  // retrieve variables from theme
+  // (all possible variables, use only what you really need)
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
+
+  app-header {
+    header {
+      background-color: mat-color($primary);
+    }
+
+    mat-toolbar {
+      .slogan-icon,
+      .slogan {
+        cursor: pointer;
+
+        &:active,
+        &:focus,
+        &:hover,
+        &:visited {
+          border: 0;
+          outline: none;
+        }
+      }
+    }
+
+    nav {
+      .mat-tab-link {
+        color: #fff;
+        height: 64px;
+
+        &.active {
+          background-color: mat-color($accent);
+          color: #fff;
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
