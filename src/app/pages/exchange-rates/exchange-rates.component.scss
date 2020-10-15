@@ -13,12 +13,18 @@
   page-exchange-rates {
     .mat-toolbar {
       border-radius: 5px;
-      margin-top: 10px;
-      margin-bottom: 10px;
+      height: auto !important;
+      margin: 10px 0;
+      padding: 8px 16px;
+
+      > .row {
+        width: 100%;
+      }
 
       .mat-form-field {
         font-size: 12px;
         height: 35px;
+        width: inherit;
       }
 
       .mat-form-field-label {
@@ -33,19 +39,22 @@
       }
     }
 
-    mat-table {
+    .table-place-holder {
       border-radius: 5px;
-      max-height: calc(100vh - 200px);
+      height: calc(100vh - 200px);
       margin-bottom: 10px;
-      overflow-y: auto;
+      overflow: auto;
+    }
+
+    mat-table {
 
       mat-header-row {
-        border-radius: 5px 5px 0;
+        //border-radius: 5px 5px 0;
       }
 
       mat-row {
         &:last-child {
-          border-radius: 0 0 5px 5px;
+          //border-radius: 0 0 5px 5px;
         }
       }
     }
