@@ -1,4 +1,6 @@
 @import '~@angular/material/theming';
+@import '../../utilities/styles/table';
+@import '../../utilities/styles/tool-bar';
 
 // mixin name will be used in main style.scss
 @mixin page-exchange-rates($theme) {
@@ -11,49 +13,7 @@
   $background: map-get($theme, background);
 
   page-exchange-rates {
-    .mat-toolbar {
-      border-radius: 5px;
-      height: auto;
-      margin: 10px 0;
-      padding: 8px 16px;
-
-      > .row {
-        width: 100%;
-      }
-
-      .mat-form-field {
-        font-size: 12px;
-        height: 35px;
-        width: inherit;
-      }
-
-      .mat-form-field-label {
-        font-weight: normal;
-      }
-
-      .mat-datepicker-toggle-default-icon {
-        color: #fff;
-        font-size: 12px;
-        height: 12px;
-        width: 12px;
-      }
-    }
-
-    .table-place-holder {
-      border-radius: 5px;
-      height: calc(100vh - 200px);
-      margin-bottom: 10px;
-      overflow: auto;
-    }
-
-    mat-table {
-      mat-header-row {
-      }
-
-      mat-row {
-        &:last-child {
-        }
-      }
-    }
+    @include table-style($theme);
+    @include tool-bar-style($theme);
   }
 }

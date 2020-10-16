@@ -63,18 +63,12 @@ export class ApiService {
   }
 
   public latest(params?: BaseRequestParams, date?: string): Observable<Latest> {
-    let url = `${this.baseUrl}/latest`;
+    let url = `${this.baseUrl}/${(date ?? 'latest')}`;
 
     let options: RequestOptions = {};
 
     if (params) {
       options.params = ApiService.processBaseRequestParams(params);
-    }
-
-    if (date) {
-      console.log('`${this.baseUrl}/${date}` ', `${this.baseUrl}/${date}`);
-
-      url = `${this.baseUrl}/${date}`;
     }
 
     return this.http.get(url, options) as Observable<Latest>;

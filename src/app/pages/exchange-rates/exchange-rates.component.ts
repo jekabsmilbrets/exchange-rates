@@ -3,13 +3,15 @@ import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
 import { Latest } from '../../intertfaces/responses/latest';
-import { Rate, Rates } from '../../intertfaces/Tables/rate';
+import { CurrentCurrencies, CurrentCurrency } from '../../intertfaces/Tables/currentCurrency';
 import { BaseRequestParams } from '../../intertfaces/utils/baseRequestParams';
 import { ApiService } from '../../services/api.service';
+import { DataService } from '../../services/data.service';
+import { FormHelper } from '../../utilities/form-helper';
 
 @Component({
   selector: 'page-exchange-rates',
@@ -27,52 +29,32 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
     'currency',
     'rate',
   ];
-  public dataSource: MatTableDataSource<Rate>;
+  public dataSource: MatTableDataSource<CurrentCurrency>;
 
   @ViewChild(MatSort) sort: MatSort;
 
-  private baseCurrency: CurrenciesEnum;
-  private readonly allCurrencies: Array<string>;
-
   private firstRun = true;
-  private subscriptions: Subscription[] = [];
 
   constructor(
       private api: ApiService,
       private _snackBar: MatSnackBar,
+      private dataService: DataService,
   ) {
-    this.maxDate = new Date();
-    this.dateControl = new FormControl(new Date());
+    this.maxDate = this.dataService.maxDate;
+    this.dateControl = new FormControl();
 
-    this.baseCurrency = CurrenciesEnum.EUR;
-    this.baseCurrencyControl = new FormControl(CurrenciesEnum.EUR);
+    this.baseCurrencyControl = new FormControl(this.dataService.baseCurrency);
 
-    this.dataSource = new MatTableDataSource<Rate>([]);
-    this.allCurrencies = Object.keys(CurrenciesEnum)
-                               .filter(key => isNaN(+key));
+    this.dataSource = new MatTableDataSource<CurrentCurrency>([]);
   }
 
   public ngOnInit() {
     this.filteredCurrencies = this.baseCurrencyControl.valueChanges
                                   .pipe(
-                                      startWith(''),
+                                      startWith(this.dataService.baseCurrency),
                                       distinctUntilChanged(),
-                                      map(value => this._filter(value)),
+                                      map(value => this.dataService._filter(value)),
                                   );
-
-    this.subscriptions.push(
-        this.baseCurrencyControl.valueChanges
-            .pipe(distinctUntilChanged())
-            .subscribe(
-                (value: string) => {
-                  if (value in CurrenciesEnum) {
-                    this.baseCurrency = CurrenciesEnum[value];
-
-                    this.reloadData();
-                  }
-                },
-            ),
-    );
 
     this.reloadData();
   }
@@ -82,10 +64,6 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   public ngOnDestroy(): void {
-    this.subscriptions.forEach(
-        (subscription: Subscription) => subscription.unsubscribe(),
-    );
-
     this.dataSource.disconnect();
 
     this.maxDate = undefined;
@@ -94,11 +72,10 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
     this.filteredCurrencies = undefined;
     this.dataSource = undefined;
     this.sort = undefined;
-    this.baseCurrency = undefined;
     this.firstRun = undefined;
-    this.subscriptions = undefined;
     this.api = undefined;
     this._snackBar = undefined;
+    this.dataService = undefined;
   }
 
   public reloadData(): void {
@@ -106,50 +83,25 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
     this._snackBar.dismiss();
     this.dataSource.data = [];
 
-    let params: BaseRequestParams = {};
-    let date;
-
-    if (this.dateControl.value) {
-      let formDate: Date = this.dateControl.value;
-      let currentDate = new Date();
-
-      currentDate.setHours(0);
-      currentDate.setMinutes(0);
-      currentDate.setSeconds(0);
-
-      if (
-          formDate.getTime() < currentDate.getTime()
-      ) {
-        const year = formDate.getFullYear();
-        const month = formDate.getMonth() + 1;
-        const day = formDate.getDate();
-
-        date = `${year}-${month}-${day}`;
-      }
-    }
-
-    params.base = this.baseCurrency;
+    let params: BaseRequestParams = {
+      base: this.dataService.baseCurrency,
+    };
+    let date = FormHelper.getDateFromControl(this.dateControl);
 
     this.api.latest(params, date)
         .pipe(take(1))
         .subscribe(
             (value: Latest) => {
-              let rates: Rates = [];
+              let currentCurrencies: CurrentCurrencies = [];
 
               for (const displayedColumnsKey of Object.keys(value.rates)) {
-                rates.push({
+                currentCurrencies.push({
                   rate: value.rates[displayedColumnsKey],
                   currency: CurrenciesEnum[displayedColumnsKey],
-                } as Rate);
+                } as CurrentCurrency);
               }
 
-              this.dataSource.data = rates;
-
-              if (this.firstRun) {
-                this.maxDate = new Date(value.date);
-                this.dateControl.setValue(this.maxDate);
-                this.firstRun = false;
-              }
+              this.dataSource.data = currentCurrencies;
             },
             (error) => {
               console.log('Problems loading data ', error);
@@ -161,12 +113,14 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
         );
   }
 
-  private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
+  public currencySelected(): void {
+    let value = this.baseCurrencyControl.value;
 
-    return this.allCurrencies.filter(
-        (option: string) => option.toLowerCase().indexOf(filterValue) === 0,
-    );
+    if (value in CurrenciesEnum && value !== this.dataService.baseCurrency) {
+      this.dataService.baseCurrency = CurrenciesEnum[value];
+
+      this.reloadData();
+    }
   }
 
   private disableControls(): void {
