@@ -1,6 +1,7 @@
 @import '~@angular/material/theming';
 @import './components/header/header.component';
 @import './pages/exchange-rates/exchange-rates.component';
+@import './pages/historic-exchange-rates/historic-exchange-rates.component';
 
 // mixin name will be used in main style.scss
 @mixin layout-theme($theme) {
@@ -25,6 +26,7 @@
   body {
     @include app-header($theme);
     @include page-exchange-rates($theme);
+    @include page-historic-exchange-rates($theme);
   }
 
   main {
