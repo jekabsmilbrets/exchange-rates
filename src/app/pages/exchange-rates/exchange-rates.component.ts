@@ -3,9 +3,8 @@ import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { componentDestroyed, OnDestroyMixin } from '@w11k/ngx-componentdestroyed';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
 import { Latest } from '../../intertfaces/responses/latest';
 import { Rate, Rates } from '../../intertfaces/Tables/rate';
@@ -17,32 +16,33 @@ import { ApiService } from '../../services/api.service';
   templateUrl: './exchange-rates.component.html',
   styleUrls: ['./exchange-rates.component.scss'],
 })
-export class ExchangeRatesComponent extends OnDestroyMixin implements OnInit, OnDestroy, AfterViewInit {
+export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
   public maxDate: Date = new Date();
-  public dateControl: FormControl = new FormControl('');
+  public dateControl = new FormControl(new Date());
 
   public baseCurrency: CurrenciesEnum = CurrenciesEnum.EUR;
   public baseCurrencyControl: FormControl = new FormControl(CurrenciesEnum.EUR);
 
   public filteredCurrencies: Observable<string[]>;
 
-  public displayedColumns = [
+  public readonly displayedColumns = [
     'currency',
     'rate',
   ];
-  public dataSource: MatTableDataSource<Rate> = new MatTableDataSource<Rate>([]);
+  public dataSource: MatTableDataSource<Rate>;
 
   @ViewChild(MatSort) sort: MatSort;
 
-  private allCurrencies: Array<string> = Object.keys(CurrenciesEnum).filter(key => isNaN(+key));
-
+  private readonly allCurrencies: Array<string>;
   private firstRun = true;
+  private subscriptions: Subscription[] = [];
 
   constructor(
       public api: ApiService,
       private _snackBar: MatSnackBar,
   ) {
-    super();
+    this.dataSource = new MatTableDataSource<Rate>([]);
+    this.allCurrencies = Object.keys(CurrenciesEnum).filter(key => isNaN(+key));
   }
 
   public ngAfterViewInit() {
@@ -52,41 +52,44 @@ export class ExchangeRatesComponent extends OnDestroyMixin implements OnInit, On
   public ngOnInit() {
     this.filteredCurrencies = this.baseCurrencyControl.valueChanges
                                   .pipe(
-                                      takeUntil(componentDestroyed(this)),
                                       startWith(''),
                                       distinctUntilChanged(),
                                       map(value => this._filter(value)),
                                   );
 
-    this.baseCurrencyControl.valueChanges
-        .pipe(
-            takeUntil(componentDestroyed(this)),
-            distinctUntilChanged(),
-        )
-        .subscribe(
-            (value: string) => {
-              if (value in CurrenciesEnum) {
-                this.baseCurrency = CurrenciesEnum[value];
+    this.subscriptions.push(
+        this.baseCurrencyControl.valueChanges
+            .pipe(distinctUntilChanged())
+            .subscribe(
+                (value: string) => {
+                  if (value in CurrenciesEnum) {
+                    this.baseCurrency = CurrenciesEnum[value];
 
-                this.reloadData();
-              }
-            },
-        );
+                    this.reloadData();
+                  }
+                },
+            ),
+    );
 
     this.reloadData();
   }
 
   public ngOnDestroy(): void {
+    this.subscriptions.forEach(
+        (subscription: Subscription) => subscription.unsubscribe(),
+    );
+
+    this.dataSource.disconnect();
+
     this.maxDate = undefined;
     this.dateControl = undefined;
     this.baseCurrency = undefined;
     this.baseCurrencyControl = undefined;
     this.filteredCurrencies = undefined;
-    this.displayedColumns = undefined;
     this.dataSource = undefined;
     this.sort = undefined;
-    this.allCurrencies = undefined;
     this.firstRun = undefined;
+    this.subscriptions = undefined;
     this.api = undefined;
     this._snackBar = undefined;
   }
@@ -100,7 +103,7 @@ export class ExchangeRatesComponent extends OnDestroyMixin implements OnInit, On
     let date;
 
     if (this.dateControl.value) {
-      let formDate: Date = new Date(this.dateControl.value);
+      let formDate: Date = this.dateControl.value;
       let currentDate = new Date();
 
       currentDate.setHours(0);
@@ -121,7 +124,7 @@ export class ExchangeRatesComponent extends OnDestroyMixin implements OnInit, On
     params.base = this.baseCurrency;
 
     this.api.latest(params, date)
-        .pipe(takeUntil(componentDestroyed(this)))
+        .pipe(take(1))
         .subscribe(
             (value: Latest) => {
               let rates: Rates = [];
