@@ -10,13 +10,17 @@
                    matInput
                    matTooltip="Some Base Currencies may not be available at all dates"
                    placeholder="Base Currency"
-                   type="text">
+                   type="text"/>
             <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
               <mat-option *ngFor="let currency of filteredCurrencies | async" [value]="currency">
                 {{currency}}
               </mat-option>
             </mat-autocomplete>
-            <button (click)="baseCurrencyControl.setValue('')" aria-label="Clear" mat-button mat-icon-button matSuffix>
+            <button (click)="baseCurrencyControl.setValue('')"
+                    aria-label="Clear"
+                    mat-button
+                    mat-icon-button
+                    matSuffix>
               <mat-icon>close</mat-icon>
             </button>
           </mat-form-field>

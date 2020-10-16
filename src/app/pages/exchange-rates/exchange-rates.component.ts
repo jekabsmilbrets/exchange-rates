@@ -17,11 +17,9 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./exchange-rates.component.scss'],
 })
 export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
-  public maxDate: Date = new Date();
-  public dateControl = new FormControl(new Date());
-
-  public baseCurrency: CurrenciesEnum = CurrenciesEnum.EUR;
-  public baseCurrencyControl: FormControl = new FormControl(CurrenciesEnum.EUR);
+  public maxDate: Date;
+  public dateControl: FormControl;
+  public baseCurrencyControl: FormControl;
 
   public filteredCurrencies: Observable<string[]>;
 
@@ -33,20 +31,25 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
 
   @ViewChild(MatSort) sort: MatSort;
 
+  private baseCurrency: CurrenciesEnum;
   private readonly allCurrencies: Array<string>;
+
   private firstRun = true;
   private subscriptions: Subscription[] = [];
 
   constructor(
-      public api: ApiService,
+      private api: ApiService,
       private _snackBar: MatSnackBar,
   ) {
-    this.dataSource = new MatTableDataSource<Rate>([]);
-    this.allCurrencies = Object.keys(CurrenciesEnum).filter(key => isNaN(+key));
-  }
+    this.maxDate = new Date();
+    this.dateControl = new FormControl(new Date());
 
-  public ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
+    this.baseCurrency = CurrenciesEnum.EUR;
+    this.baseCurrencyControl = new FormControl(CurrenciesEnum.EUR);
+
+    this.dataSource = new MatTableDataSource<Rate>([]);
+    this.allCurrencies = Object.keys(CurrenciesEnum)
+                               .filter(key => isNaN(+key));
   }
 
   public ngOnInit() {
@@ -74,6 +77,10 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
     this.reloadData();
   }
 
+  public ngAfterViewInit() {
+    this.dataSource.sort = this.sort;
+  }
+
   public ngOnDestroy(): void {
     this.subscriptions.forEach(
         (subscription: Subscription) => subscription.unsubscribe(),
@@ -83,11 +90,11 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
 
     this.maxDate = undefined;
     this.dateControl = undefined;
-    this.baseCurrency = undefined;
     this.baseCurrencyControl = undefined;
     this.filteredCurrencies = undefined;
     this.dataSource = undefined;
     this.sort = undefined;
+    this.baseCurrency = undefined;
     this.firstRun = undefined;
     this.subscriptions = undefined;
     this.api = undefined;
@@ -150,9 +157,7 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
               this._snackBar.open(error.error.error);
               this.enableControls();
             },
-            () => {
-              this.enableControls();
-            },
+            () => this.enableControls(),
         );
   }
 
