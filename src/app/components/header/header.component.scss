@@ -32,10 +32,10 @@
     nav {
       .mat-tab-link {
         color: #fff;
-        height: 64px;
+        height: inherit;
 
         &.active {
-          background-color: mat-color($accent);
+          //background-color: mat-color($accent);
           color: #fff;
           opacity: 1;
         }

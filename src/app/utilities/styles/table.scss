@@ -1,0 +1,31 @@
+@import '~@angular/material/theming';
+
+// mixin name will be used in main style.scss
+@mixin table-style($theme) {
+  // retrieve variables from theme
+  // (all possible variables, use only what you really need)
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
+
+  .table-place-holder {
+    border-radius: 5px;
+    height: auto;
+    margin-bottom: 10px;
+    max-height: calc(100vh - 205px);
+    min-height: 56px;
+    overflow: auto;
+
+    mat-table {
+      mat-header-row {
+      }
+
+      mat-row {
+        &:last-child {
+        }
+      }
+    }
+  }
+}

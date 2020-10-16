@@ -7,6 +7,7 @@ import { MAT_DATE_LOCALE, MatNativeDateModule, MatOptionModule } from '@angular/
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
@@ -46,6 +47,7 @@ import { HistoricExchangeRatesComponent } from './pages/historic-exchange-rates/
     MatButtonModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatPaginatorModule,
   ],
   providers: [
     {

@@ -1,8 +1,8 @@
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
 
-export interface Rate {
+export interface CurrentCurrency {
   currency: CurrenciesEnum;
   rate: number;
 }
 
-export declare type Rates = Rate[];
+export declare type CurrentCurrencies = CurrentCurrency[];

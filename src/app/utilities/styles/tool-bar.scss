@@ -1,0 +1,41 @@
+@import '~@angular/material/theming';
+
+// mixin name will be used in main style.scss
+@mixin tool-bar-style($theme) {
+  // retrieve variables from theme
+  // (all possible variables, use only what you really need)
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
+  $white: #fff;
+
+  .mat-toolbar {
+    border-radius: 5px;
+    height: auto;
+    margin: 10px 0;
+    padding: 8px 16px;
+
+    > .row {
+      width: inherit;
+    }
+
+    .mat-form-field {
+      font-size: 12px;
+      height: 35px;
+      width: inherit;
+    }
+
+    .mat-form-field-label {
+      font-weight: normal;
+    }
+
+    .mat-datepicker-toggle-default-icon {
+      color: $white;
+      font-size: 12px;
+      height: 12px;
+      width: 12px;
+    }
+  }
+}

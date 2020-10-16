@@ -13,14 +13,14 @@ export const routes: Routes = [
     path: 'exchange-rates',
     component: ExchangeRatesComponent,
     data: {
-      name: 'Rates',
+      name: 'Current',
     },
   },
   {
     path: 'historic-exchange-rates',
     component: HistoricExchangeRatesComponent,
     data: {
-      name: 'Historic Rates',
+      name: 'Historic',
     },
   },
 ];
