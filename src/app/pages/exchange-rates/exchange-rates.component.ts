@@ -1,10 +1,11 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { delay, distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
 import { Latest } from '../../intertfaces/responses/latest';
 import { CurrentCurrencies, CurrentCurrency } from '../../intertfaces/Tables/currentCurrency';
@@ -20,8 +21,9 @@ import { FormHelper } from '../../utilities/form-helper';
 })
 export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
   public maxDate: Date;
-  public dateControl: FormControl;
-  public baseCurrencyControl: FormControl;
+  public minDate: Date;
+
+  public searchForm: FormGroup;
 
   public filteredCurrencies: Observable<string[]>;
 
@@ -29,26 +31,37 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
     'currency',
     'rate',
   ];
+
   public dataSource: MatTableDataSource<CurrentCurrency>;
 
-  @ViewChild(MatSort) sort: MatSort;
+  public isLoading: BehaviorSubject<boolean>;
 
-  private firstRun = true;
+  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(
       private api: ApiService,
-      private _snackBar: MatSnackBar,
+      private snackBar: MatSnackBar,
       private dataService: DataService,
   ) {
+    this.isLoading = new BehaviorSubject<boolean>(false);
+
     this.maxDate = this.dataService.maxDate;
-    this.dateControl = new FormControl();
+    this.minDate = this.dataService.minDate;
 
-    this.baseCurrencyControl = new FormControl(this.dataService.baseCurrency);
-
-    this.dataSource = new MatTableDataSource<CurrentCurrency>([]);
+    this.searchForm = this.dataService.currentSearchForm;
+    this.dataSource = this.dataService.currentDataSource;
   }
 
-  public ngOnInit() {
+  public get dateControl(): FormControl {
+    return this.searchForm?.controls?.date as FormControl;
+  }
+
+  public get baseCurrencyControl(): FormControl {
+    return this.searchForm?.controls?.baseCurrency as FormControl;
+  }
+
+  public ngOnInit(): void {
     this.filteredCurrencies = this.baseCurrencyControl.valueChanges
                                   .pipe(
                                       startWith(this.dataService.baseCurrency),
@@ -56,43 +69,45 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
                                       map(value => this.dataService._filter(value)),
                                   );
 
-    this.reloadData();
+    // this.reloadData();
   }
 
-  public ngAfterViewInit() {
+  public ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
   }
 
   public ngOnDestroy(): void {
-    this.dataSource.disconnect();
-
     this.maxDate = undefined;
-    this.dateControl = undefined;
-    this.baseCurrencyControl = undefined;
+    this.minDate = undefined;
+    this.searchForm = undefined;
     this.filteredCurrencies = undefined;
     this.dataSource = undefined;
+    this.isLoading = undefined;
     this.sort = undefined;
-    this.firstRun = undefined;
+    this.paginator = undefined;
     this.api = undefined;
-    this._snackBar = undefined;
+    this.snackBar = undefined;
     this.dataService = undefined;
   }
 
   public reloadData(): void {
-    this.disableControls();
-    this._snackBar.dismiss();
-    this.dataSource.data = [];
+    this.preSearch();
 
-    let params: BaseRequestParams = {
+    const params: BaseRequestParams = {
       base: this.dataService.baseCurrency,
     };
-    let date = FormHelper.getDateFromControl(this.dateControl);
+
+    const date = FormHelper.getDateFromControl(this.dateControl);
 
     this.api.latest(params, date)
-        .pipe(take(1))
+        .pipe(
+            take(1),
+            delay(250), // Adding little delay to minimize element flashing
+        )
         .subscribe(
             (value: Latest) => {
-              let currentCurrencies: CurrentCurrencies = [];
+              const currentCurrencies: CurrentCurrencies = [];
 
               for (const displayedColumnsKey of Object.keys(value.rates)) {
                 currentCurrencies.push({
@@ -103,33 +118,35 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
 
               this.dataSource.data = currentCurrencies;
             },
-            (error) => {
-              console.log('Problems loading data ', error);
-
-              this._snackBar.open(error.error.error);
-              this.enableControls();
-            },
-            () => this.enableControls(),
+            (error) => this.postSearch(error.error.error),
+            () => this.postSearch(),
         );
   }
 
   public currencySelected(): void {
-    let value = this.baseCurrencyControl.value;
+    const value: CurrenciesEnum = this.baseCurrencyControl.value;
 
-    if (value in CurrenciesEnum && value !== this.dataService.baseCurrency) {
+    if (value !== this.dataService.baseCurrency) {
       this.dataService.baseCurrency = CurrenciesEnum[value];
-
-      this.reloadData();
     }
   }
 
-  private disableControls(): void {
-    this.dateControl.disable();
+  private preSearch(): void {
+    this.isLoading.next(true);
+
     this.baseCurrencyControl.disable();
+
+    this.snackBar.dismiss();
+    this.dataSource.data = [];
   }
 
-  private enableControls(): void {
-    this.dateControl.enable();
+  private postSearch(error?: string): void {
+    this.isLoading.next(false);
+
     this.baseCurrencyControl.enable();
+
+    if (error) {
+      this.snackBar.open(error);
+    }
   }
 }

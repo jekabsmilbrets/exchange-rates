@@ -1,15 +1,47 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
 import { CurrenciesEnum } from '../enums/currenciesEnum';
+import { CurrentCurrency } from '../intertfaces/Tables/currentCurrency';
+import { HistoryCurrency } from '../intertfaces/Tables/historyCurrency';
+import { FormHelper } from '../utilities/form-helper';
 import { StorageManagerService } from './storage-manager.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class DataService {
+export class DataService implements OnDestroy {
+  private dataSources: {
+    currentDataSource: MatTableDataSource<CurrentCurrency>,
+    historicDataSource: MatTableDataSource<HistoryCurrency>,
+  };
+
+  private searchForms: {
+    currentSearchForm: FormGroup,
+    historicSearchForm: FormGroup,
+  };
 
   constructor(
       private storageManagerService: StorageManagerService,
   ) {
+    this.createDataSources();
+    this.createSearchForms();
+  }
+
+  get currentSearchForm(): FormGroup {
+    return this.searchForms.currentSearchForm;
+  }
+
+  get historicSearchForm(): FormGroup {
+    return this.searchForms.historicSearchForm;
+  }
+
+  get currentDataSource(): MatTableDataSource<CurrentCurrency> {
+    return this.dataSources.currentDataSource;
+  }
+
+  get historicDataSource(): MatTableDataSource<HistoryCurrency> {
+    return this.dataSources.historicDataSource;
   }
 
   get allCurrencies(): Array<string> {
@@ -75,7 +107,7 @@ export class DataService {
   }
 
   get maxDate(): Date {
-    let storedDate: string = this.storageManagerService.getItem('maxDate', 'sessionStorage');
+    const storedDate: string = this.storageManagerService.getItem('maxDate', 'sessionStorage');
     let maxDate: Date = storedDate ? new Date(storedDate) : undefined;
 
     if (storedDate === null || storedDate === undefined) {
@@ -99,11 +131,90 @@ export class DataService {
     );
   }
 
+  get minDate(): Date {
+    const storedDate: string = this.storageManagerService.getItem('minDate');
+    let minDate: Date = storedDate ? new Date(storedDate) : undefined;
+
+    if (storedDate === null || storedDate === undefined) {
+      minDate = new Date('1999-01-01');
+
+      this.storageManagerService.setItem(
+          'minDate',
+          minDate.toJSON(),
+      );
+    }
+
+    return minDate;
+  }
+
+  set minDate(minDate: Date) {
+    this.storageManagerService.setItem(
+        'minDate',
+        minDate.toJSON(),
+    );
+  }
+
+  public ngOnDestroy(): void {
+    this.dataSources.currentDataSource.disconnect();
+    this.dataSources.historicDataSource.disconnect();
+
+    this.dataSources = undefined;
+    this.searchForms = undefined;
+    this.storageManagerService = undefined;
+  }
+
   public _filter(value: string): string[] {
     const filterValue = value.toLowerCase();
 
     return this.allCurrencies.filter(
         (option: string) => option.toLowerCase().indexOf(filterValue) === 0,
     );
+  }
+
+  private createSearchForms(): void {
+    this.searchForms = {
+      currentSearchForm: new FormGroup({
+        date: new FormControl(undefined),
+        baseCurrency: new FormControl(
+            this.baseCurrency,
+            [
+              Validators.required,
+              FormHelper.currencyValidator,
+            ],
+        ),
+      }),
+
+      historicSearchForm: new FormGroup({
+        baseCurrency: new FormControl(
+            this.baseCurrency,
+            [
+              Validators.required,
+              FormHelper.currencyValidator,
+            ],
+        ),
+        chosenCurrency: new FormControl(
+            this.chosenCurrency,
+            [
+              Validators.required,
+              FormHelper.currencyValidator,
+            ],
+        ),
+        startDate: new FormControl(
+            undefined,
+            Validators.required,
+        ),
+        endDate: new FormControl(
+            undefined,
+            Validators.required,
+        ),
+      }),
+    };
+  }
+
+  private createDataSources(): void {
+    this.dataSources = {
+      currentDataSource: new MatTableDataSource<CurrentCurrency>([]),
+      historicDataSource: new MatTableDataSource<HistoryCurrency>([]),
+    };
   }
 }

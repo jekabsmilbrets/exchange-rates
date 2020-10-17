@@ -26,8 +26,11 @@ export class ApiService {
   ) {
   }
 
-  private static processBaseRequestParams(params: BaseRequestParams) {
-    let outputParams: {
+  private static processBaseRequestParams(params: BaseRequestParams): {
+    symbols?: string;
+    base?: string;
+  } {
+    const outputParams: {
       symbols?: string;
       base?: string;
     } = {};
@@ -43,7 +46,12 @@ export class ApiService {
     return Object.keys(outputParams).length > 0 ? outputParams : undefined;
   }
 
-  private static processHistoryRequestParams(params: HistoryRequestParams) {
+  private static processHistoryRequestParams(params: HistoryRequestParams): {
+    start_at?: string;
+    end_at?: string;
+    symbols?: string;
+    base?: string;
+  } {
     let outputParams: {
       start_at?: string;
       end_at?: string;
@@ -63,9 +71,8 @@ export class ApiService {
   }
 
   public latest(params?: BaseRequestParams, date?: string): Observable<Latest> {
-    let url = `${this.baseUrl}/${(date ?? 'latest')}`;
-
-    let options: RequestOptions = {};
+    const url = `${this.baseUrl}/${(date ?? 'latest')}`;
+    const options: RequestOptions = {};
 
     if (params) {
       options.params = ApiService.processBaseRequestParams(params);
@@ -75,9 +82,8 @@ export class ApiService {
   }
 
   public history(params: HistoryRequestParams): Observable<History> {
-    let url = this.baseUrl + '/history';
-
-    let options: RequestOptions = {};
+    const url = this.baseUrl + '/history';
+    const options: RequestOptions = {};
 
     if (params) {
       options.params = ApiService.processHistoryRequestParams(params);

@@ -31,11 +31,48 @@
       font-weight: normal;
     }
 
+    .mat-date-range-input-start-wrapper,
+    .mat-date-range-input-end-wrapper {
+      width: 100%;
+    }
+
+    .mat-date-range-input-end-wrapper {
+      text-align: right;
+    }
+
+    .mat-date-range-input-inner[disabled],
+    .mat-input-element:disabled {
+      color: $white;
+    }
+
     .mat-datepicker-toggle-default-icon {
       color: $white;
-      font-size: 12px;
-      height: 12px;
-      width: 12px;
+      height: 16px;
+      width: 16px;
+    }
+
+    .mat-form-field:hover {
+      .mat-datepicker-toggle-default-icon {
+        transform: rotate(360deg);
+        transition: all .5s ease-in-out;
+      }
+    }
+
+    .mat-date-range-input-separator {
+      color: $white;
+    }
+
+    .mat-form-field-suffix {
+      .mat-icon-button .mat-icon {
+        font-size: 16px;
+        height: 16px;
+        line-height: 16px;
+        width: 16px;
+      }
+    }
+
+    .mat-raised-button {
+      width: inherit;
     }
   }
 }

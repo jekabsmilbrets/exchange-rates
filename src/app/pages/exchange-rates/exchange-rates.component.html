@@ -2,13 +2,13 @@
   <div class="col-lg-6 offset-lg-3">
     <mat-toolbar class="mat-elevation-z4 flex" color="accent">
       <div class="row mx-0">
-        <div class="col-md-6 pl-md-0 pr-md-1 px-1">
+        <div class="col-md-5 pl-md-0 pr-md-1 px-1">
           <mat-form-field>
             <input [formControl]="baseCurrencyControl"
                    [matAutocomplete]="auto"
                    aria-label="Base Currency"
                    matInput
-                   matTooltip="Some Base Currencies may not be available at all dates"
+                   matTooltip="Some Base Currencies may not be available at all dates..."
                    placeholder="Base Currency"
                    type="text"/>
             <mat-autocomplete #auto="matAutocomplete"
@@ -28,24 +28,40 @@
           </mat-form-field>
         </div>
 
-        <div class="col-md-6 pr-md-0 pl-md-1 px-1">
-          <mat-form-field>
+        <div class="col-md-5 px-1">
+          <mat-form-field
+              matTooltip="Use datepicker. If no Date is selected will load latest data...">
             <mat-label>Date of rates</mat-label>
-            <input (dateChange)="reloadData()"
-                   [formControl]="dateControl"
+            <input [formControl]="dateControl"
                    [matDatepicker]="datePicker"
                    [max]="maxDate"
+                   [min]="minDate"
+                   [readonly]="true"
                    matInput>
             <mat-datepicker-toggle [for]="datePicker" matSuffix></mat-datepicker-toggle>
-            <mat-datepicker #datePicker></mat-datepicker>
+            <mat-datepicker #datePicker disabled="false"></mat-datepicker>
           </mat-form-field>
+        </div>
+
+        <div class="col-md-2 pr-md-0 pl-md-1 px-1">
+          <button (click)="reloadData()"
+                  [disabled]="!searchForm.valid"
+                  color="primary"
+                  mat-raised-button>
+            <mat-icon>search</mat-icon>
+            Search
+          </button>
         </div>
       </div>
     </mat-toolbar>
   </div>
 
   <div class="col-lg-6 offset-lg-3">
-    <div class="table-place-holder mat-elevation-z4">
+    <mat-progress-bar *ngIf="this.isLoading | async"
+                      mode="indeterminate"></mat-progress-bar>
+
+    <div [hidden]="this.isLoading | async"
+         class="table-place-holder mat-elevation-z4">
       <mat-table [dataSource]="dataSource"
                  matSort
                  matSortActive="currency"
@@ -64,5 +80,10 @@
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
       </mat-table>
     </div>
+
+    <mat-paginator [length]="100"
+                   [pageSizeOptions]="[5, 10, 25, 100]"
+                   [pageSize]="10">
+    </mat-paginator>
   </div>
 </div>

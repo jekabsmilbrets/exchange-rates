@@ -1,11 +1,11 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { delay, distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
 import { History } from '../../intertfaces/responses/history';
 import { HistoryCurrencies, HistoryCurrency } from '../../intertfaces/Tables/historyCurrency';
@@ -20,12 +20,10 @@ import { FormHelper } from '../../utilities/form-helper';
   styleUrls: ['./historic-exchange-rates.component.scss'],
 })
 export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
-  public baseCurrencyControl: FormControl;
-  public chosenCurrencyControl: FormControl;
-
   public maxDate: Date;
-  public startDateControl: FormControl;
-  public endDateControl: FormControl;
+  public minDate: Date;
+
+  public searchForm: FormGroup;
 
   public filteredCurrenciesForBase: Observable<string[]>;
   public filteredCurrencies: Observable<string[]>;
@@ -36,31 +34,54 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
   ];
   public dataSource: MatTableDataSource<HistoryCurrency>;
 
+  public isLoading: BehaviorSubject<boolean>;
+
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
-  private subscriptions: Subscription[] = [];
-
   constructor(
       private api: ApiService,
-      private _snackBar: MatSnackBar,
+      private snackBar: MatSnackBar,
       private dataService: DataService,
   ) {
-    this.baseCurrencyControl = new FormControl(this.dataService.baseCurrency);
-
-    this.chosenCurrencyControl = new FormControl(this.dataService.chosenCurrency);
+    this.isLoading = new BehaviorSubject<boolean>(false);
 
     this.maxDate = this.dataService.maxDate;
-    this.startDateControl = new FormControl(new Date());
-    this.endDateControl = new FormControl(new Date());
+    this.minDate = this.dataService.minDate;
 
-    this.dataSource = new MatTableDataSource<HistoryCurrency>([]);
+    this.searchForm = this.dataService.historicSearchForm;
+    this.dataSource = this.dataService.historicDataSource;
+  }
+
+  public get baseCurrencyControl(): FormControl {
+    return this.searchForm?.controls?.baseCurrency as FormControl;
+  }
+
+  public get chosenCurrencyControl(): FormControl {
+    return this.searchForm?.controls?.chosenCurrency as FormControl;
+  }
+
+  public get startDateControl(): FormControl {
+    return this.searchForm?.controls?.startDate as FormControl;
+  }
+
+  public get endDateControl(): FormControl {
+    return this.searchForm?.controls?.endDate as FormControl;
   }
 
   public ngOnDestroy(): void {
-    this.subscriptions.forEach(
-        (subscription: Subscription) => subscription.unsubscribe(),
-    );
+    this.maxDate = undefined;
+    this.minDate = undefined;
+    this.searchForm = undefined;
+    this.filteredCurrenciesForBase = undefined;
+    this.filteredCurrencies = undefined;
+    this.dataSource = undefined;
+    this.isLoading = undefined;
+    this.sort = undefined;
+    this.paginator = undefined;
+    this.api = undefined;
+    this.snackBar = undefined;
+    this.dataService = undefined;
   }
 
   public ngOnInit(): void {
@@ -76,15 +97,9 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
                                       distinctUntilChanged(),
                                       map(value => this.dataService._filter(value)),
                                   );
-
-    this.subscriptions.push(
-        this.endDateControl.valueChanges
-            .pipe(distinctUntilChanged())
-            .subscribe(() => this.reloadData()),
-    );
   }
 
-  public ngAfterViewInit() {
+  public ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
     this.dataSource.sortingDataAccessor = (item, property) => {
@@ -99,37 +114,33 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
   }
 
   public currencySelected(): void {
-    let chosenCurrency = this.chosenCurrencyControl.value;
+    const checks: Array<{
+      value: CurrenciesEnum,
+      dataServiceKey: string
+    }> = [
+      {
+        value: this.chosenCurrencyControl.value,
+        dataServiceKey: 'chosenCurrency',
+      },
+      {
+        value: this.baseCurrencyControl.value,
+        dataServiceKey: 'baseCurrency',
+      },
+    ];
 
-    if (
-        chosenCurrency in CurrenciesEnum &&
-        chosenCurrency !== this.dataService.chosenCurrency
-    ) {
-      this.dataService.chosenCurrency = CurrenciesEnum[chosenCurrency];
-
-      this.reloadData();
-
-      return;
-    }
-
-    let baseCurrency = this.baseCurrencyControl.value;
-
-    if (
-        baseCurrency in CurrenciesEnum &&
-        baseCurrency !== this.dataService.baseCurrency
-    ) {
-      this.dataService.baseCurrency = CurrenciesEnum[baseCurrency];
-
-      this.reloadData();
-    }
+    checks.forEach(
+        (check) => {
+          if (check.value !== this.dataService[check.dataServiceKey]) {
+            this.dataService[check.dataServiceKey] = CurrenciesEnum[check.value];
+          }
+        },
+    );
   }
 
   public reloadData(): void {
-    this.disableControls();
-    this._snackBar.dismiss();
-    this.dataSource.data = [];
+    this.preSearch();
 
-    let params: HistoryRequestParams = {
+    const params: HistoryRequestParams = {
       base: this.dataService.baseCurrency,
       symbols: [this.dataService.chosenCurrency],
       start_at: FormHelper.getDateFromControl(this.startDateControl),
@@ -138,7 +149,7 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
 
     if (!params.start_at || !params.end_at || params.start_at === params.end_at) {
       if (params.start_at === params.end_at) {
-        this._snackBar.open(
+        this.snackBar.open(
             'Date Range must be more than 1 day!',
             undefined,
             {
@@ -147,47 +158,61 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
         );
       }
 
+      this.isLoading.next(false);
       this.enableControls();
       return;
     }
 
     this.api.history(params)
-        .pipe(take(1))
+        .pipe(
+            take(1),
+            delay(250), // Adding little delay to minimize element flashing
+        )
         .subscribe(
             (value: History) => {
-              let historyCurrencies: HistoryCurrencies = [];
+              const historyCurrencies: HistoryCurrencies = [];
 
               for (const date of Object.keys(value.rates)) {
                 historyCurrencies.push({
-                  date: date,
+                  date,
                   rate: value.rates[date][this.dataService.chosenCurrency],
                 } as HistoryCurrency);
               }
 
               this.dataSource.data = historyCurrencies;
             },
-            (error) => {
-              console.log('Problems loading data ', error);
-
-              this._snackBar.open(error.error.error);
-              this.enableControls();
-            },
-            () => this.enableControls(),
+            (error) => this.postSearch(error.error.error),
+            () => this.postSearch(),
         );
   }
 
   private disableControls(): void {
     this.baseCurrencyControl.disable();
     this.chosenCurrencyControl.disable();
-    this.startDateControl.disable();
-    this.endDateControl.disable();
   }
 
   private enableControls(): void {
     this.baseCurrencyControl.enable();
     this.chosenCurrencyControl.enable();
-    this.startDateControl.enable();
-    this.endDateControl.enable();
   }
 
+  private preSearch(): void {
+    this.isLoading.next(true);
+
+    this.disableControls();
+
+    this.snackBar.dismiss();
+    this.dataSource.data = [];
+  }
+
+  private postSearch(error?: string): void {
+    this.isLoading.next(false);
+
+    this.baseCurrencyControl.enable();
+    this.chosenCurrencyControl.enable();
+
+    if (error) {
+      this.snackBar.open(error);
+    }
+  }
 }

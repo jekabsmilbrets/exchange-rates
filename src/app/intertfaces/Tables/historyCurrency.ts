@@ -1,6 +1,6 @@
 export interface HistoryCurrency {
   date: string;
-  rate: number
+  rate: number;
 }
 
 export declare type HistoryCurrencies = HistoryCurrency[];
