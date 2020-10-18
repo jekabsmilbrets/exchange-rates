@@ -21,14 +21,18 @@ import { FormHelper } from '../../utilities/form-helper';
 })
 export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
   public searchForm: FormGroup;
+
   public filteredCurrenciesForBase: Observable<string[]>;
   public filteredCurrencies: Observable<string[]>;
+
   public readonly displayedColumns = [
     'date',
     'rate',
   ];
   public dataSource: MatTableDataSource<HistoryCurrency>;
+
   public isLoading: BehaviorSubject<boolean>;
+
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -144,18 +148,10 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
     };
 
     if (!params.start_at || !params.end_at || params.start_at === params.end_at) {
-      if (params.start_at === params.end_at) {
-        this.snackBar.open(
-            'Date Range must be more than 1 day!',
-            undefined,
-            {
-              duration: 1000,
-            },
-        );
-      }
+      const error = params.start_at === params.end_at ? 'Date Range must be more than 1 day!' : undefined;
 
-      this.isLoading.next(false);
-      this.enableControls();
+      this.postSearch(error);
+
       return;
     }
 
@@ -182,20 +178,11 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
         );
   }
 
-  private disableControls(): void {
-    this.baseCurrencyControl.disable();
-    this.chosenCurrencyControl.disable();
-  }
-
-  private enableControls(): void {
-    this.baseCurrencyControl.enable();
-    this.chosenCurrencyControl.enable();
-  }
-
   private preSearch(): void {
     this.isLoading.next(true);
 
-    this.disableControls();
+    this.baseCurrencyControl.disable();
+    this.chosenCurrencyControl.disable();
 
     this.snackBar.dismiss();
     this.dataSource.data = [];

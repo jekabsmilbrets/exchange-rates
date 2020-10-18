@@ -1,12 +1,12 @@
 <div class="row">
   <div class="col-lg-6 offset-lg-3">
     <mat-toolbar class="mat-elevation-z4 flex" color="accent">
-      <div class="row mx-0">
+      <form (ngSubmit)="reloadData()" [formGroup]="searchForm" class="row mx-0">
         <div class="col-md-3 pl-md-0 pr-md-1 px-1">
           <mat-form-field>
-            <input [formControl]="chosenCurrencyControl"
-                   [matAutocomplete]="autoChosenCurrency"
+            <input [matAutocomplete]="autoChosenCurrency"
                    aria-label="Currency"
+                   formControlName="chosenCurrency"
                    matInput
                    matTooltip="Some Currencies may not be available at all dates"
                    placeholder="Currency"
@@ -31,9 +31,9 @@
 
         <div class="col-md-3 px-1">
           <mat-form-field>
-            <input [formControl]="baseCurrencyControl"
-                   [matAutocomplete]="autoBaseCurrency"
+            <input [matAutocomplete]="autoBaseCurrency"
                    aria-label="Base Currency"
+                   formControlName="baseCurrency"
                    matInput
                    matTooltip="Some Base Currencies may not be available at all dates"
                    placeholder="Base Currency"
@@ -63,12 +63,12 @@
             <mat-date-range-input [max]="maxDate"
                                   [min]="minDate"
                                   [rangePicker]="picker">
-              <input [formControl]="startDateControl"
-                     [readonly]="true"
+              <input [readonly]="true"
+                     formControlName="startDate"
                      matStartDate
                      placeholder="Start date">
-              <input [formControl]="endDateControl"
-                     [readonly]="true"
+              <input [readonly]="true"
+                     formControlName="endDate"
                      matEndDate
                      placeholder="End date">
             </mat-date-range-input>
@@ -79,15 +79,15 @@
         </div>
 
         <div class="col-md-2 pr-md-0 pl-md-1 px-1">
-          <button (click)="reloadData()"
-                  [disabled]="!searchForm.valid"
+          <button [disabled]="!searchForm.valid"
                   color="primary"
-                  mat-raised-button>
+                  mat-raised-button
+                  type="submit">
             <mat-icon>search</mat-icon>
             Search
           </button>
         </div>
-      </div>
+      </form>
     </mat-toolbar>
   </div>
 
