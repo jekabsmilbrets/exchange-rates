@@ -7,7 +7,7 @@ export class FormHelper {
 
     const formDate: Date = control.value ? new Date(control.value) : undefined;
 
-    if (formDate) {
+    if (formDate && !isNaN(formDate.getTime())) {
       const year = formDate.getFullYear();
       const month = formDate.getMonth() + 1;
       const day = formDate.getDate();

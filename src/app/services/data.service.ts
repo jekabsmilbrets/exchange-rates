@@ -27,7 +27,14 @@ export class DataService implements OnDestroy {
       private storageManagerService: StorageManagerService,
       private api: ApiService,
   ) {
-    this.getMaxDate();
+    this.api.latest()
+        .pipe(take(1))
+        .subscribe(
+            (value: Latest) => {
+              this.maxDate = new Date(value.date);
+            },
+        );
+
     this.createDataSources();
     this.createSearchForms();
   }
@@ -49,27 +56,13 @@ export class DataService implements OnDestroy {
   }
 
   get allCurrencies(): Array<string> {
-    let allCurrencies = JSON.parse(
-        this.storageManagerService.getItem('allCurrencies'),
-    );
-
-    if (allCurrencies === null) {
-      allCurrencies = Object.keys(CurrenciesEnum)
-                            .filter(key => isNaN(+key));
-
-      this.storageManagerService.setItem(
-          'allCurrencies',
-          JSON.stringify(allCurrencies),
-      );
-    }
-
-    return allCurrencies;
+    return Object.values(CurrenciesEnum) as Array<string>;
   }
 
   get baseCurrency(): CurrenciesEnum {
     let baseCurrency: CurrenciesEnum = this.storageManagerService.getItem('baseCurrency') as CurrenciesEnum;
 
-    if (baseCurrency === null) {
+    if (!baseCurrency) {
       baseCurrency = CurrenciesEnum.EUR;
 
       this.storageManagerService.setItem(
@@ -91,7 +84,7 @@ export class DataService implements OnDestroy {
   get chosenCurrency(): CurrenciesEnum {
     let chosenCurrency: CurrenciesEnum = this.storageManagerService.getItem('chosenCurrency') as CurrenciesEnum;
 
-    if (chosenCurrency === null) {
+    if (!chosenCurrency) {
       chosenCurrency = CurrenciesEnum.USD;
 
       this.storageManagerService.setItem(
@@ -114,7 +107,7 @@ export class DataService implements OnDestroy {
     const storedDate: string = this.storageManagerService.getItem('maxDate', 'sessionStorage');
     let maxDate: Date = storedDate ? new Date(storedDate) : undefined;
 
-    if (storedDate === null || storedDate === undefined) {
+    if (!storedDate) {
       maxDate = new Date();
 
       this.storageManagerService.setItem(
@@ -139,7 +132,7 @@ export class DataService implements OnDestroy {
     const storedDate: string = this.storageManagerService.getItem('minDate');
     let minDate: Date = storedDate ? new Date(storedDate) : undefined;
 
-    if (storedDate === null || storedDate === undefined) {
+    if (!storedDate) {
       minDate = new Date('1999-01-01');
 
       this.storageManagerService.setItem(
@@ -221,15 +214,5 @@ export class DataService implements OnDestroy {
       currentDataSource: new MatTableDataSource<CurrentCurrency>([]),
       historicDataSource: new MatTableDataSource<HistoryCurrency>([]),
     };
-  }
-
-  private getMaxDate(): void {
-    this.api.latest()
-        .pipe(take(1))
-        .subscribe(
-            (value: Latest) => {
-              this.maxDate = new Date(value.date);
-            },
-        );
   }
 }

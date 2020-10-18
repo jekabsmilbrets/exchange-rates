@@ -33,7 +33,7 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(
-      public snackBar: MatSnackBar,
+      private snackBar: MatSnackBar,
       private api: ApiService,
       private dataService: DataService,
   ) {

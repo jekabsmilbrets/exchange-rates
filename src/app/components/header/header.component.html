@@ -13,7 +13,6 @@
         <nav backgroundColor="primary" mat-tab-nav-bar>
           <a *ngFor="let route of routes"
              [active]="isLinkActive(route.path)"
-             [hidden]="route.path===''"
              [routerLink]="route.path"
              mat-tab-link
              routerLinkActive="active">{{route?.data?.name}}</a>
