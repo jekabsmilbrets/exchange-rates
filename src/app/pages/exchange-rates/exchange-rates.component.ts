@@ -20,9 +20,6 @@ import { FormHelper } from '../../utilities/form-helper';
   styleUrls: ['./exchange-rates.component.scss'],
 })
 export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
-  public maxDate: Date;
-  public minDate: Date;
-
   public searchForm: FormGroup;
 
   public filteredCurrencies: Observable<string[]>;
@@ -31,7 +28,6 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
     'currency',
     'rate',
   ];
-
   public dataSource: MatTableDataSource<CurrentCurrency>;
 
   public isLoading: BehaviorSubject<boolean>;
@@ -40,17 +36,22 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(
+      public snackBar: MatSnackBar,
       private api: ApiService,
-      private snackBar: MatSnackBar,
       private dataService: DataService,
   ) {
     this.isLoading = new BehaviorSubject<boolean>(false);
 
-    this.maxDate = this.dataService.maxDate;
-    this.minDate = this.dataService.minDate;
-
     this.searchForm = this.dataService.currentSearchForm;
     this.dataSource = this.dataService.currentDataSource;
+  }
+
+  public get maxDate(): Date {
+    return this.dataService.maxDate;
+  }
+
+  public get minDate(): Date {
+    return this.dataService.minDate;
   }
 
   public get dateControl(): FormControl {
@@ -68,8 +69,6 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
                                       distinctUntilChanged(),
                                       map(value => this.dataService._filter(value)),
                                   );
-
-    // this.reloadData();
   }
 
   public ngAfterViewInit(): void {
@@ -78,8 +77,6 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   public ngOnDestroy(): void {
-    this.maxDate = undefined;
-    this.minDate = undefined;
     this.searchForm = undefined;
     this.filteredCurrencies = undefined;
     this.dataSource = undefined;

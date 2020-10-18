@@ -15,7 +15,6 @@ export class DataService implements OnDestroy {
     currentDataSource: MatTableDataSource<CurrentCurrency>,
     historicDataSource: MatTableDataSource<HistoryCurrency>,
   };
-
   private searchForms: {
     currentSearchForm: FormGroup,
     historicSearchForm: FormGroup,

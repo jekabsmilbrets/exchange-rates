@@ -19,7 +19,7 @@
   }
 
   body {
-    @include app-header($theme);
+    @include component-header($theme);
     @include page-exchange-rates($theme);
     @include page-historic-exchange-rates($theme);
 

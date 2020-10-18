@@ -20,22 +20,15 @@ import { FormHelper } from '../../utilities/form-helper';
   styleUrls: ['./historic-exchange-rates.component.scss'],
 })
 export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
-  public maxDate: Date;
-  public minDate: Date;
-
   public searchForm: FormGroup;
-
   public filteredCurrenciesForBase: Observable<string[]>;
   public filteredCurrencies: Observable<string[]>;
-
   public readonly displayedColumns = [
     'date',
     'rate',
   ];
   public dataSource: MatTableDataSource<HistoryCurrency>;
-
   public isLoading: BehaviorSubject<boolean>;
-
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -46,11 +39,16 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
   ) {
     this.isLoading = new BehaviorSubject<boolean>(false);
 
-    this.maxDate = this.dataService.maxDate;
-    this.minDate = this.dataService.minDate;
-
     this.searchForm = this.dataService.historicSearchForm;
     this.dataSource = this.dataService.historicDataSource;
+  }
+
+  public get maxDate(): Date {
+    return this.dataService.maxDate;
+  }
+
+  public get minDate(): Date {
+    return this.dataService.minDate;
   }
 
   public get baseCurrencyControl(): FormControl {
@@ -70,8 +68,6 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
   }
 
   public ngOnDestroy(): void {
-    this.maxDate = undefined;
-    this.minDate = undefined;
     this.searchForm = undefined;
     this.filteredCurrenciesForBase = undefined;
     this.filteredCurrencies = undefined;

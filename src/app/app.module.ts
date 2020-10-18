@@ -5,6 +5,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DATE_LOCALE, MatNativeDateModule, MatOptionModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -22,6 +23,9 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ExchangeRatesComponent } from './pages/exchange-rates/exchange-rates.component';
 import { HistoricExchangeRatesComponent } from './pages/historic-exchange-rates/historic-exchange-rates.component';
+import { ApiService } from './services/api.service';
+import { DataService } from './services/data.service';
+import { StorageManagerService } from './services/storage-manager.service';
 
 @NgModule({
   declarations: [
@@ -33,6 +37,10 @@ import { HistoricExchangeRatesComponent } from './pages/historic-exchange-rates/
   imports: [
     BrowserAnimationsModule,
     AppRoutingModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatToolbarModule,
     MatTabsModule,
     MatIconModule,
@@ -41,8 +49,6 @@ import { HistoricExchangeRatesComponent } from './pages/historic-exchange-rates/
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    ReactiveFormsModule,
-    HttpClientModule,
     MatTableModule,
     MatSortModule,
     MatButtonModule,
@@ -52,6 +58,9 @@ import { HistoricExchangeRatesComponent } from './pages/historic-exchange-rates/
     MatProgressBarModule,
   ],
   providers: [
+    ApiService,
+    DataService,
+    StorageManagerService,
     {
       provide: MAT_DATE_LOCALE,
       useValue: 'en-GB',

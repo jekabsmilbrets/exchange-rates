@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router, Routes } from '@angular/router';
 
 @Component({
-  selector: 'app-header',
+  selector: 'component-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnDestroy {
   public routes: Routes;
 
   constructor(
@@ -17,10 +17,11 @@ export class HeaderComponent implements OnInit {
     );
   }
 
-  ngOnInit(): void {
-  }
-
   public isLinkActive(path: string): boolean {
     return this.router.isActive(path, true);
+  }
+
+  public ngOnDestroy(): void {
+    this.routes = undefined;
   }
 }

@@ -15,6 +15,16 @@ export interface RequestOptions {
   body?: any;
 }
 
+export interface ProcessedBaseRequestParams {
+  symbols?: string;
+  base?: string;
+}
+
+export interface ProcessedHistoryRequestParams extends ProcessedBaseRequestParams {
+  start_at?: string;
+  end_at?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -26,10 +36,7 @@ export class ApiService {
   ) {
   }
 
-  private static processBaseRequestParams(params: BaseRequestParams): {
-    symbols?: string;
-    base?: string;
-  } {
+  private static processBaseRequestParams(params: BaseRequestParams): ProcessedBaseRequestParams {
     const outputParams: {
       symbols?: string;
       base?: string;
@@ -46,16 +53,8 @@ export class ApiService {
     return Object.keys(outputParams).length > 0 ? outputParams : undefined;
   }
 
-  private static processHistoryRequestParams(params: HistoryRequestParams): {
-    start_at?: string;
-    end_at?: string;
-    symbols?: string;
-    base?: string;
-  } {
-    let outputParams: {
-      start_at?: string;
-      end_at?: string;
-    } = {};
+  private static processHistoryRequestParams(params: HistoryRequestParams): ProcessedHistoryRequestParams {
+    let outputParams: ProcessedHistoryRequestParams = {};
 
     if (Object.keys(params).includes('start_at')) {
       outputParams.start_at = params.start_at;
