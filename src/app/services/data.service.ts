@@ -1,10 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { take } from 'rxjs/operators';
 import { CurrenciesEnum } from '../enums/currenciesEnum';
-import { CurrentCurrency } from '../intertfaces/Tables/currentCurrency';
-import { HistoryCurrency } from '../intertfaces/Tables/historyCurrency';
+import { Latest } from '../intertfaces/responses/latest';
+import { CurrentCurrency } from '../intertfaces/tables/currentCurrency';
+import { HistoryCurrency } from '../intertfaces/tables/historyCurrency';
 import { FormHelper } from '../utilities/form-helper';
+import { ApiService } from './api.service';
 import { StorageManagerService } from './storage-manager.service';
 
 @Injectable({
@@ -22,7 +25,9 @@ export class DataService implements OnDestroy {
 
   constructor(
       private storageManagerService: StorageManagerService,
+      private api: ApiService,
   ) {
+    this.getMaxDate();
     this.createDataSources();
     this.createSearchForms();
   }
@@ -160,6 +165,7 @@ export class DataService implements OnDestroy {
     this.dataSources = undefined;
     this.searchForms = undefined;
     this.storageManagerService = undefined;
+    this.api = undefined;
   }
 
   public _filter(value: string): string[] {
@@ -215,5 +221,15 @@ export class DataService implements OnDestroy {
       currentDataSource: new MatTableDataSource<CurrentCurrency>([]),
       historicDataSource: new MatTableDataSource<HistoryCurrency>([]),
     };
+  }
+
+  private getMaxDate(): void {
+    this.api.latest()
+        .pipe(take(1))
+        .subscribe(
+            (value: Latest) => {
+              this.maxDate = new Date(value.date);
+            },
+        );
   }
 }

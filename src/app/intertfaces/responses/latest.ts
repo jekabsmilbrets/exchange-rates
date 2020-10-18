@@ -1,5 +1,5 @@
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
-import { Rates } from '../utils/rates';
+import { Rates } from '../utilities/rates';
 
 export interface Latest {
   rates: Rates;

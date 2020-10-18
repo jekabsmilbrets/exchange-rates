@@ -8,8 +8,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
 import { History } from '../../intertfaces/responses/history';
-import { HistoryCurrencies, HistoryCurrency } from '../../intertfaces/Tables/historyCurrency';
-import { HistoryRequestParams } from '../../intertfaces/utils/historyRequestParams';
+import { HistoryCurrencies, HistoryCurrency } from '../../intertfaces/tables/historyCurrency';
+import { HistoryRequestParams } from '../../intertfaces/utilities/historyRequestParams';
 import { ApiService } from '../../services/api.service';
 import { DataService } from '../../services/data.service';
 import { FormHelper } from '../../utilities/form-helper';
@@ -20,8 +20,6 @@ import { FormHelper } from '../../utilities/form-helper';
   styleUrls: ['./historic-exchange-rates.component.scss'],
 })
 export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
-  public searchForm: FormGroup;
-
   public filteredCurrenciesForBase: Observable<string[]>;
   public filteredCurrencies: Observable<string[]>;
 
@@ -29,7 +27,6 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
     'date',
     'rate',
   ];
-  public dataSource: MatTableDataSource<HistoryCurrency>;
 
   public isLoading: BehaviorSubject<boolean>;
 
@@ -42,9 +39,14 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
       private dataService: DataService,
   ) {
     this.isLoading = new BehaviorSubject<boolean>(false);
+  }
 
-    this.searchForm = this.dataService.historicSearchForm;
-    this.dataSource = this.dataService.historicDataSource;
+  public get searchForm(): FormGroup {
+    return this.dataService.historicSearchForm;
+  }
+
+  public get dataSource(): MatTableDataSource<HistoryCurrency> {
+    return this.dataService.historicDataSource;
   }
 
   public get maxDate(): Date {
@@ -72,10 +74,8 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
   }
 
   public ngOnDestroy(): void {
-    this.searchForm = undefined;
     this.filteredCurrenciesForBase = undefined;
     this.filteredCurrencies = undefined;
-    this.dataSource = undefined;
     this.isLoading = undefined;
     this.sort = undefined;
     this.paginator = undefined;
@@ -138,7 +138,24 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
   }
 
   public reloadData(): void {
-    this.preSearch();
+    this.isLoading.next(true);
+
+    this.baseCurrencyControl.disable();
+    this.chosenCurrencyControl.disable();
+
+    this.snackBar.dismiss();
+    this.dataSource.data = [];
+
+    const postSearch = (error?: string): void => {
+      this.isLoading.next(false);
+
+      this.baseCurrencyControl.enable();
+      this.chosenCurrencyControl.enable();
+
+      if (error) {
+        this.snackBar.open(error);
+      }
+    };
 
     const params: HistoryRequestParams = {
       base: this.dataService.baseCurrency,
@@ -150,7 +167,7 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
     if (!params.start_at || !params.end_at || params.start_at === params.end_at) {
       const error = params.start_at === params.end_at ? 'Date Range must be more than 1 day!' : undefined;
 
-      this.postSearch(error);
+      postSearch(error);
 
       return;
     }
@@ -173,29 +190,8 @@ export class HistoricExchangeRatesComponent implements OnInit, OnDestroy, AfterV
 
               this.dataSource.data = historyCurrencies;
             },
-            (error) => this.postSearch(error.error.error),
-            () => this.postSearch(),
+            (error) => postSearch(error.error.error),
+            () => postSearch(),
         );
-  }
-
-  private preSearch(): void {
-    this.isLoading.next(true);
-
-    this.baseCurrencyControl.disable();
-    this.chosenCurrencyControl.disable();
-
-    this.snackBar.dismiss();
-    this.dataSource.data = [];
-  }
-
-  private postSearch(error?: string): void {
-    this.isLoading.next(false);
-
-    this.baseCurrencyControl.enable();
-    this.chosenCurrencyControl.enable();
-
-    if (error) {
-      this.snackBar.open(error);
-    }
   }
 }

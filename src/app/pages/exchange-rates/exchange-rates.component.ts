@@ -8,8 +8,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, distinctUntilChanged, map, startWith, take } from 'rxjs/operators';
 import { CurrenciesEnum } from '../../enums/currenciesEnum';
 import { Latest } from '../../intertfaces/responses/latest';
-import { CurrentCurrencies, CurrentCurrency } from '../../intertfaces/Tables/currentCurrency';
-import { BaseRequestParams } from '../../intertfaces/utils/baseRequestParams';
+import { CurrentCurrencies, CurrentCurrency } from '../../intertfaces/tables/currentCurrency';
+import { BaseRequestParams } from '../../intertfaces/utilities/baseRequestParams';
 import { ApiService } from '../../services/api.service';
 import { DataService } from '../../services/data.service';
 import { FormHelper } from '../../utilities/form-helper';
@@ -20,15 +20,12 @@ import { FormHelper } from '../../utilities/form-helper';
   styleUrls: ['./exchange-rates.component.scss'],
 })
 export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit {
-  public searchForm: FormGroup;
-
   public filteredCurrencies: Observable<string[]>;
 
   public readonly displayedColumns = [
     'currency',
     'rate',
   ];
-  public dataSource: MatTableDataSource<CurrentCurrency>;
 
   public isLoading: BehaviorSubject<boolean>;
 
@@ -41,9 +38,14 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
       private dataService: DataService,
   ) {
     this.isLoading = new BehaviorSubject<boolean>(false);
+  }
 
-    this.searchForm = this.dataService.currentSearchForm;
-    this.dataSource = this.dataService.currentDataSource;
+  public get searchForm(): FormGroup {
+    return this.dataService.currentSearchForm;
+  }
+
+  public get dataSource(): MatTableDataSource<CurrentCurrency> {
+    return this.dataService.currentDataSource;
   }
 
   public get maxDate(): Date {
@@ -77,9 +79,7 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   public ngOnDestroy(): void {
-    this.searchForm = undefined;
     this.filteredCurrencies = undefined;
-    this.dataSource = undefined;
     this.isLoading = undefined;
     this.sort = undefined;
     this.paginator = undefined;
@@ -89,7 +89,21 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   public reloadData(): void {
-    this.preSearch();
+    this.isLoading.next(true);
+
+    this.baseCurrencyControl.disable();
+    this.snackBar.dismiss();
+    this.dataSource.data = [];
+
+    const postSearch = (error?: string): void => {
+      this.isLoading.next(false);
+
+      this.baseCurrencyControl.enable();
+
+      if (error) {
+        this.snackBar.open(error);
+      }
+    };
 
     const params: BaseRequestParams = {
       base: this.dataService.baseCurrency,
@@ -115,8 +129,8 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
 
               this.dataSource.data = currentCurrencies;
             },
-            (error) => this.postSearch(error.error.error),
-            () => this.postSearch(),
+            (error) => postSearch(error.error.error),
+            () => postSearch(),
         );
   }
 
@@ -125,25 +139,6 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy, AfterViewInit 
 
     if (value !== this.dataService.baseCurrency) {
       this.dataService.baseCurrency = CurrenciesEnum[value];
-    }
-  }
-
-  private preSearch(): void {
-    this.isLoading.next(true);
-
-    this.baseCurrencyControl.disable();
-
-    this.snackBar.dismiss();
-    this.dataSource.data = [];
-  }
-
-  private postSearch(error?: string): void {
-    this.isLoading.next(false);
-
-    this.baseCurrencyControl.enable();
-
-    if (error) {
-      this.snackBar.open(error);
     }
   }
 }
