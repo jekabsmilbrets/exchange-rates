@@ -10,6 +10,7 @@
                    matInput
                    matTooltip="Some Base Currencies may not be available at all dates..."
                    placeholder="Base Currency"
+                   name="baseCurrency"
                    type="text"/>
             <mat-autocomplete #auto="matAutocomplete"
                               (optionSelected)="currencySelected()"
@@ -23,6 +24,7 @@
                     mat-button
                     mat-icon-button
                     matSuffix
+                    name="clearBaseCurrency"
                     type="button">
               <mat-icon>close</mat-icon>
             </button>

@@ -8,6 +8,7 @@
                    aria-label="Currency"
                    formControlName="chosenCurrency"
                    matInput
+                   name="chosenCurrency"
                    matTooltip="Some Currencies may not be available at all dates"
                    placeholder="Currency"
                    type="text"/>
@@ -23,6 +24,7 @@
                     aria-label="Clear"
                     mat-button
                     mat-icon-button
+                    name="clearChosenCurrency"
                     matSuffix
                     type="button">
               <mat-icon>close</mat-icon>
@@ -38,6 +40,7 @@
                    matInput
                    matTooltip="Some Base Currencies may not be available at all dates"
                    placeholder="Base Currency"
+                   name="baseCurrency"
                    type="text"/>
             <mat-autocomplete #autoBaseCurrency="matAutocomplete"
                               (optionSelected)="currencySelected()"
@@ -52,6 +55,7 @@
                     mat-button
                     mat-icon-button
                     matSuffix
+                    name="clearBaseCurrency"
                     type="button">
               <mat-icon>close</mat-icon>
             </button>
