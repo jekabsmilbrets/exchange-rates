@@ -28,7 +28,7 @@ describe('DataService', () => {
     service = TestBed.inject(DataService);
     storageManagerService = TestBed.inject(StorageManagerService);
     apiService = TestBed.inject(ApiService);
-    httpMock = TestBed.get(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {

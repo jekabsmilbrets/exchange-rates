@@ -1,4 +1,4 @@
-import { browser, by, element } from 'protractor';
+import { browser, by, element, ElementArrayFinder, ElementFinder } from 'protractor';
 
 export class HistoricExchangeRates {
   navigateTo(): Promise<unknown> {
@@ -13,7 +13,7 @@ export class HistoricExchangeRates {
     return element(by.css('main mat-table')).isDisplayed() as Promise<boolean>;
   }
 
-  matTableElements() {
+  matTableElements(): ElementArrayFinder {
     return element.all(by.css('main mat-table mat-row'));
   }
 
@@ -21,7 +21,7 @@ export class HistoricExchangeRates {
     return element(by.css('main mat-toolbar input[name=baseCurrency]')).getText() as Promise<string>;
   }
 
-  baseCurrencyInputClearButton() {
+  baseCurrencyInputClearButton(): ElementFinder {
     return element(by.css('main mat-toolbar button[name=clearBaseCurrency]'));
   }
 
@@ -29,15 +29,15 @@ export class HistoricExchangeRates {
     return element(by.css('main mat-toolbar input[name=chosenCurrency]')).getText() as Promise<string>;
   }
 
-  chosenCurrencyInputClearButton() {
+  chosenCurrencyInputClearButton(): ElementFinder {
     return element(by.css('main mat-toolbar button[name=clearChosenCurrency]'));
   }
 
-  submitButton() {
+  submitButton(): ElementFinder {
     return element(by.css('main mat-toolbar form button[type=submit]'));
   }
 
-  datePickerToggleButton() {
+  datePickerToggleButton(): ElementFinder {
     return element(by.css('main mat-toolbar mat-datepicker-toggle button'));
   }
 
@@ -45,27 +45,27 @@ export class HistoricExchangeRates {
     return element(by.css('mat-datepicker-content')).isDisplayed() as Promise<boolean>;
   }
 
-  datePickerOverlayButton() {
+  datePickerOverlayButton(): ElementFinder {
     return element(by.css('.cdk-overlay-backdrop'));
   }
 
-  datePickerMYChooseButton() {
+  datePickerMYChooseButton(): ElementFinder {
     return element(by.css('.mat-calendar-period-button'));
   }
 
-  datePickerCorrectYearButton() {
+  datePickerCorrectYearButton(): ElementFinder {
     return element(by.css('td[aria-label="2020"]'));
   }
 
-  datePickerCorrectYearMonthButton() {
+  datePickerCorrectYearMonthButton(): ElementFinder {
     return element(by.css('td[aria-label="October 2020"]'));
   }
 
-  datePickerCorrectYearMonthStartDateButton() {
+  datePickerCorrectYearMonthStartDateButton(): ElementFinder {
     return element(by.css('td[aria-label="1 October 2020"]'));
   }
 
-  datePickerCorrectYearMonthEndDateButton() {
+  datePickerCorrectYearMonthEndDateButton(): ElementFinder {
     return element(by.css('td[aria-label="10 October 2020"]'));
   }
 }

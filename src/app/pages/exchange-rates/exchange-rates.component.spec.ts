@@ -80,7 +80,7 @@ describe('ExchangeRatesComponent', () => {
     dataService = TestBed.inject(DataService);
     apiService = TestBed.inject(ApiService);
     matSnackBar = TestBed.inject(MatSnackBar);
-    httpMock = TestBed.get(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
 
     fixture.autoDetectChanges();
   });

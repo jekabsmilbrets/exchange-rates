@@ -26,7 +26,7 @@ describe('ApiService', () => {
     });
 
     service = TestBed.inject(ApiService);
-    httpMock = TestBed.get(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
@@ -41,7 +41,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
 
                 const latest: Latest = {
                   rates: {
@@ -55,13 +55,13 @@ describe('ApiService', () => {
                 };
 
 
-                service.latest()
+                apiService.latest()
                        .subscribe((value: Latest) => {
                          expect(value.base).toBe(CurrenciesEnum.EUR);
                          expect(value.rates.CAD).toBeTruthy();
                        });
 
-                let req = httpMock.expectOne(testAPIUrl + '/latest');
+                const req = httpMock.expectOne(testAPIUrl + '/latest');
                 expect(req.request.method).toBe('GET');
 
                 req.flush(latest);
@@ -79,7 +79,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: Latest = {
                   rates: {
                     CAD: 1.5497,
@@ -92,7 +92,7 @@ describe('ApiService', () => {
                 };
 
 
-                service.latest(undefined, testDate)
+                apiService.latest(undefined, testDate)
                        .subscribe(
                            (value: Latest) => {
                              expect(value.base).toBe(CurrenciesEnum.EUR);
@@ -101,7 +101,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(testAPIUrl + '/' + testDate);
+                const req = httpMock.expectOne(testAPIUrl + '/' + testDate);
                 expect(req.request.method).toBe('GET');
 
                 req.flush(latest);
@@ -119,7 +119,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: Latest = {
                   rates: {
                     CAD: 1.5497,
@@ -134,7 +134,7 @@ describe('ApiService', () => {
                   base: CurrenciesEnum.EUR,
                 };
 
-                service.latest(params)
+                apiService.latest(params)
                        .subscribe(
                            (value: Latest) => {
                              expect(value.base).toBe(CurrenciesEnum.EUR);
@@ -143,7 +143,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(testAPIUrl + '/latest?base=' + CurrenciesEnum.EUR);
+                const req = httpMock.expectOne(testAPIUrl + '/latest?base=' + CurrenciesEnum.EUR);
                 expect(req.request.method).toBe('GET');
 
                 req.flush(latest);
@@ -161,7 +161,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: Latest = {
                   rates: {
                     CAD: 1.5497,
@@ -174,7 +174,7 @@ describe('ApiService', () => {
                   symbols: testSymbols,
                 };
 
-                service.latest(params)
+                apiService.latest(params)
                        .subscribe(
                            (value: Latest) => {
                              expect(value.base).toBe(CurrenciesEnum.EUR);
@@ -184,7 +184,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(testAPIUrl + '/latest?symbols=' + testSymbols.join(','));
+                const req = httpMock.expectOne(testAPIUrl + '/latest?symbols=' + testSymbols.join(','));
                 expect(req.request.method).toBe('GET');
 
                 req.flush(latest);
@@ -202,7 +202,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: Latest = {
                   rates: {
                     CAD: 1.5497,
@@ -216,7 +216,7 @@ describe('ApiService', () => {
                   base: CurrenciesEnum.EUR,
                 };
 
-                service.latest(params, testDate)
+                apiService.latest(params, testDate)
                        .subscribe(
                            (value: Latest) => {
                              expect(value.base).toBe(CurrenciesEnum.EUR);
@@ -226,7 +226,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(
+                const req = httpMock.expectOne(
                     'https://api.exchangeratesapi.io/' +
                     testDate +
                     '?symbols=' +
@@ -251,7 +251,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: History = {
                   rates: {
                     '2018-01-03': {
@@ -277,7 +277,7 @@ describe('ApiService', () => {
                   end_at: '2018-01-04',
                 };
 
-                service.history(params)
+                apiService.history(params)
                        .subscribe(
                            (value: History) => {
                              expect(value.rates['2018-01-04']).toBeTruthy();
@@ -289,7 +289,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(
+                const req = httpMock.expectOne(
                     testAPIUrl +
                     '/history?start_at=2018-01-02&end_at=2018-01-04',
                 );
@@ -310,7 +310,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: History = {
                   rates: {
                     '2018-01-03': {
@@ -338,7 +338,7 @@ describe('ApiService', () => {
                 };
 
 
-                service.history(params)
+                apiService.history(params)
                        .subscribe(
                            (value: History) => {
                              expect(value.rates['2018-01-04']).toBeTruthy();
@@ -350,7 +350,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(
+                const req = httpMock.expectOne(
                     testAPIUrl +
                     '/history?base=' +
                     CurrenciesEnum.EUR +
@@ -373,7 +373,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: History = {
                   rates: {
                     '2018-01-03': {
@@ -401,7 +401,7 @@ describe('ApiService', () => {
                 };
 
 
-                service.history(params)
+                apiService.history(params)
                        .subscribe(
                            (value: History) => {
                              expect(value.rates['2018-01-04']).toBeTruthy();
@@ -413,7 +413,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(
+                const req = httpMock.expectOne(
                     testAPIUrl +
                     '/history?symbols=' +
                     testSymbols.join(',') +
@@ -436,7 +436,7 @@ describe('ApiService', () => {
                 HttpTestingController,
                 ApiService,
               ],
-              (httpClient: HttpTestingController, service: ApiService) => {
+              (httpClient: HttpTestingController, apiService: ApiService) => {
                 const latest: History = {
                   rates: {
                     '2018-01-03': {
@@ -464,7 +464,7 @@ describe('ApiService', () => {
                   base: CurrenciesEnum.EUR,
                 };
 
-                service.history(params)
+                apiService.history(params)
                        .subscribe(
                            (value: History) => {
                              expect(value.rates['2018-01-04']).toBeTruthy();
@@ -476,7 +476,7 @@ describe('ApiService', () => {
                            },
                        );
 
-                let req = httpMock.expectOne(
+                const req = httpMock.expectOne(
                     testAPIUrl +
                     '/history?symbols=' +
                     testSymbols.join(',') +

@@ -80,7 +80,7 @@ describe('HistoricExchangeRatesComponent', () => {
     dataService = TestBed.inject(DataService);
     apiService = TestBed.inject(ApiService);
     matSnackBar = TestBed.inject(MatSnackBar);
-    httpMock = TestBed.get(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
 
     fixture.autoDetectChanges();
   });
@@ -121,21 +121,24 @@ describe('HistoricExchangeRatesComponent', () => {
     expect(component.endDateControl).toBeInstanceOf(FormControl);
   });
 
-  it('should read baseCurrencyControl value and change dataService.baseCurrency if not equal to it triggered by method "currencySelected"', fakeAsync(() => {
-    component.baseCurrencyControl.setValue(CurrenciesEnum.EUR);
-    component.currencySelected();
+  it(
+      'should read baseCurrencyControl value and change ' +
+      'dataService.baseCurrency if not equal to it triggered by method "currencySelected"',
+      fakeAsync(() => {
+        component.baseCurrencyControl.setValue(CurrenciesEnum.EUR);
+        component.currencySelected();
 
-    tick(100);
+        tick(100);
 
-    expect(dataService.baseCurrency).toBe(CurrenciesEnum.EUR);
+        expect(dataService.baseCurrency).toBe(CurrenciesEnum.EUR);
 
-    component.baseCurrencyControl.setValue(CurrenciesEnum.CAD);
-    component.currencySelected();
+        component.baseCurrencyControl.setValue(CurrenciesEnum.CAD);
+        component.currencySelected();
 
-    tick(100);
+        tick(100);
 
-    expect(dataService.baseCurrency).toBe(CurrenciesEnum.CAD);
-  }));
+        expect(dataService.baseCurrency).toBe(CurrenciesEnum.CAD);
+      }));
 
   it('should read chosenCurrencyControl value and change dataService.chosenCurrency if not equal to it triggered by method "currencySelected"', fakeAsync(() => {
     component.chosenCurrencyControl.setValue(CurrenciesEnum.EUR);
@@ -200,7 +203,7 @@ describe('HistoricExchangeRatesComponent', () => {
         rate: 1.5496,
       },
     ];
-    
+
     component.startDateControl.setValue('2020-10-16');
     component.endDateControl.setValue('2020-10-17');
     component.chosenCurrencyControl.setValue(CurrenciesEnum.CAD);

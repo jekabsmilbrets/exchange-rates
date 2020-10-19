@@ -51,7 +51,8 @@ describe('HeaderComponent', () => {
   });
 
   it('should contain 2 a elements in nav tabs', () => {
-    let nav = fixture.debugElement.query(By.css('nav'));
+    const nav = fixture.debugElement.query(By.css('nav'));
+
     expect(nav.queryAll(By.css('a')).length).toEqual(2);
   });
 

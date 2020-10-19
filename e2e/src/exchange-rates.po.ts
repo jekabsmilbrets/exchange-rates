@@ -1,4 +1,4 @@
-import { browser, by, element } from 'protractor';
+import { browser, by, element, ElementArrayFinder, ElementFinder, ElementHelper } from 'protractor';
 
 export class ExchangeRates {
   navigateTo(): Promise<unknown> {
@@ -13,7 +13,7 @@ export class ExchangeRates {
     return element(by.css('main mat-table')).isDisplayed() as Promise<boolean>;
   }
 
-  matTableElements() {
+  matTableElements(): ElementArrayFinder {
     return element.all(by.css('main mat-table mat-row'));
   }
 
@@ -21,15 +21,15 @@ export class ExchangeRates {
     return element(by.css('main mat-toolbar input[name=baseCurrency]')).getText() as Promise<string>;
   }
 
-  baseCurrencyInputClearButton() {
+  baseCurrencyInputClearButton(): ElementFinder {
     return element(by.css('main mat-toolbar button[name=clearBaseCurrency]'));
   }
 
-  submitButton() {
+  submitButton(): ElementFinder {
     return element(by.css('main mat-toolbar form button[type=submit]'));
   }
 
-  datePickerToggleButton() {
+  datePickerToggleButton(): ElementFinder {
     return element(by.css('main mat-toolbar mat-datepicker-toggle button'));
   }
 
