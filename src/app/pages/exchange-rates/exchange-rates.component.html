@@ -2,7 +2,7 @@
   <div class="col-lg-6 offset-lg-3">
     <mat-toolbar class="mat-elevation-z4 flex" color="accent">
       <form (ngSubmit)="reloadData()" [formGroup]="searchForm" class="row mx-0">
-        <div class="col-md-5 pl-md-0 pr-md-1 px-1">
+        <div class="col-md-5 pl-md-0 pr-md-1 col-lg-4 pl-lg-0 pr-lg-1 px-1">
           <mat-form-field>
             <input [matAutocomplete]="auto"
                    aria-label="Base Currency"
@@ -31,7 +31,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-md-5 px-1">
+        <div class="col-md-5 col-lg-4 px-1">
           <mat-form-field
               matTooltip="Use datepicker. If no Date is selected will load latest data...">
             <mat-label>Date of rates</mat-label>
@@ -46,7 +46,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-md-2 pr-md-0 pl-md-1 px-1">
+        <div class="col-md-2 pr-md-0 pl-md-1 col-lg-4 pr-lg-0 pl-lg-1 px-1">
           <button [disabled]="!searchForm.valid"
                   color="primary"
                   mat-raised-button
